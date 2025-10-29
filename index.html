@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>News Feed App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #0078d7;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    header input {
+      width: 250px;
+      padding: 8px;
+      margin-right: 5px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    header button {
+      background: #fff;
+      color: #0078d7;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      background: #e0e0e0;
+      padding: 10px;
+      flex-wrap: wrap;
+    }
+
+    nav button {
+      background: #0078d7;
+      color: white;
+      border: none;
+      margin: 5px;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    nav button:hover {
+      background: #005fa3;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .news-card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .news-card:hover {
+      transform: scale(1.02);
+    }
+
+    .news-card img {
+      width: 100%;
+      border-radius: 10px;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .news-card h3 {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+
+    .news-card p {
+      color: #555;
+      font-size: 15px;
+    }
+
+    .news-card a {
+      display: inline-block;
+      margin-top: 10px;
+      text-decoration: none;
+      color: #0078d7;
+      font-weight: bold;
+    }
+
+    .news-card a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      background: #0078d7;
+      color: white;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📰 News Feed</h1>
+    <input type="text" id="search" placeholder="Search news..." />
+    <button id="searchBtn">Search</button>
+  </header>
+
+  <nav>
+    <button class="category" data-category="recent">Recent</button>
+    <button class="category" data-category="general">General</button>
+    <button class="category" data-category="technology">Technology</button>
+    <button class="category" data-category="business">Business</button>
+    <button class="category" data-category="sports">Sports</button>
+    <button class="category" data-category="health">Health</button>
+    <button class="category" data-category="science">Science</button>
+    <button class="category" data-category="entertainment">Entertainment</button>
+  </nav>
+
+  <main id="news-container"></main>
+
+  <footer>© 2025 News Feed App | Offline Version with Latest News</footer>
+
+  <script>
+    // Local Recent News Data (October 2025)
+    const recentNews = [
+      {
+        title: "Amazon Plans Up to 30,000 Corporate Job Cuts",
+        description: "Amazon is planning one of the largest corporate job reductions in tech history to streamline operations post-pandemic.",
+        imageUrl: "https://assets.aboutamazon.com/95/eb/78f9df674cb987eb167325659b50/amazon-second-headquarters-arlington.png",
+        url: "https://www.reuters.com/business/world-at-work/amazon-targets-many-30000-corporate-job-cuts-sources-say-2025-10-27/",
+        category: "business"
+      },
+      {
+        title: "Global Emissions May Start Declining — But Far Short of Target",
+        description: "The UN reports that current climate pledges could slow emissions, but reductions remain far below 1.5°C goals.",
+        imageUrl: "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/PWQWLTAPANPR7E3VHJJMZLFYA4.jpg",
+        url: "https://www.reuters.com/sustainability/cop/countries-new-climate-plans-start-cutting-global-emissions-un-says-2025-10-28/",
+        category: "environment"
+      },
+      {
+        title: "Cyclone Montha Hits India's Eastern Coast",
+        description: "Cyclone Montha made landfall in Andhra Pradesh, bringing heavy rains and winds up to 110 km/h before weakening inland.",
+        imageUrl: "https://images.indianexpress.com/2025/10/montha-andhra-2.jpg?w=414",
+        url: "https://apnews.com/article/09123bce1ccc6ec9a3a2d670feb98ce6",
+        category: "weather"
+      },
+      {
+        title: "India Announces Rashtriya Vigyan Puraskar 2025 Winners",
+        description: "Professor Jayant Narlikar honoured posthumously; IIT Madras professors among this year’s national science award winners.",
+        imageUrl: "https://images.indianexpress.com/2025/10/Rashtriya-Vigyan-Puraskar-2025-Complete-list-of-awardees-this-year-Image-via-X-%40airnewsalerts.png",
+        url: "https://timesofindia.indiatimes.com/education/news/rashtriya-vigyan-puraskar-2025-professor-jayant-narlikar-honoured-posthumously-iit-madras-professors-among-winners-check-list-here/articleshow/124869054.cms",
+        category: "science"
+      }
+    ];
+
+    const newsContainer = document.getElementById("news-container");
+    const searchBtn = document.getElementById("searchBtn");
+    const searchInput = document.getElementById("search");
+    const categoryButtons = document.querySelectorAll(".category");
+
+    // Display News Function
+    function displayNews(articles) {
+      newsContainer.innerHTML = "";
+      articles.forEach(article => {
+        const card = document.createElement("div");
+        card.classList.add("news-card");
+        card.innerHTML = `
+          <img src="${article.imageUrl || 'https://via.placeholder.com/300x180'}" alt="news image">
+          <h3>${article.title}</h3>
+          <p>${article.description}</p>
+          <a href="${article.url}" target="_blank">Read more</a>
+        `;
+        newsContainer.appendChild(card);
+      });
+    }
+
+    // Show Recent News
+    function loadRecentNews() {
+      displayNews(recentNews);
+    }
+
+    // Search Filter (Local)
+    searchBtn.addEventListener("click", () => {
+      const query = searchInput.value.toLowerCase();
+      const filtered = recentNews.filter(n => n.title.toLowerCase().includes(query) || n.description.toLowerCase().includes(query));
+      displayNews(filtered.length ? filtered : [{title:"No results", description:"No articles found for your search.", imageUrl:"", url:"#"}]);
+    });
+
+    // Category Buttons
+    categoryButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const category = button.dataset.category;
+        if (category === "recent") return loadRecentNews();
+        const filtered = recentNews.filter(n => n.category === category);
+        displayNews(filtered.length ? filtered : [{title:"No articles", description:"No articles in this category.", imageUrl:"", url:"#"}]);
+      });
+    });
+
+    // Load Default
+    loadRecentNews();
+  </script>
+</body>
+</html>
